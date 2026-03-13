@@ -1,0 +1,28 @@
+import requests
+from bs4 import BeautifulSoup
+
+target = input("Enter target website: ")
+
+sql_payloads = ["' OR '1'='1", "' OR 1=1--"]
+xss_payloads = ["<script>alert(1)</script>"]
+
+print("Scanning:", target)
+
+def scan_sql():
+    for payload in sql_payloads:
+        url = target + "?id=" + payload
+        r = requests.get(url)
+
+        if "sql" in r.text.lower() or "database" in r.text.lower():
+            print("⚠ SQL Injection vulnerability detected at:", url)
+
+def scan_xss():
+    for payload in xss_payloads:
+        url = target + "?q=" + payload
+        r = requests.get(url)
+
+        if payload in r.text:
+            print("⚠ XSS vulnerability detected at:", url)
+
+scan_sql()
+scan_xss()
